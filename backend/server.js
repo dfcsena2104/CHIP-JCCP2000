@@ -57,7 +57,6 @@ app.post("/usuarios", (req, res) => {
 
     }
   );
-
 });
 
 // Consultar todos los usuarios
@@ -77,6 +76,86 @@ app.get("/usuarios", (req, res) => {
 
     res.json(resultados);
   });
+});
+
+// Eliminar un usuario por su ID
+app.delete("/usuarios/:id", (req, res) => {
+
+  // Obtenemos el ID enviado en la URL
+  const { id } = req.params;
+
+  // Consulta SQL para eliminar el usuario
+  const sql = "DELETE FROM usuarios WHERE id_usuario = ?";
+
+  conexion.query(sql, [id], (error, resultado) => {
+
+    // Verificamos si ocurrió un error
+    if (error) {
+      console.error("Error al eliminar usuario:", error.message);
+
+      return res.status(500).json({
+        mensaje: "Error al eliminar el usuario"
+      });
+    }
+
+    // Verificamos si el usuario existe
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        mensaje: "Usuario no encontrado"
+      });
+    }
+
+    // Confirmamos la eliminación
+    res.json({
+      mensaje: "Usuario eliminado correctamente"
+    });
+  });
+});
+
+// Actualizar un usuario por su ID
+app.put("/usuarios/:id", (req, res) => {
+
+  // Obtenemos el ID enviado en la URL
+  const { id } = req.params;
+
+  // Obtenemos los nuevos datos enviados desde React
+  const { nombre, correo, telefono } = req.body;
+
+  // Consulta SQL para actualizar el usuario
+  const sql = `
+    UPDATE usuarios
+    SET nombre = ?, correo = ?, telefono = ?
+    WHERE id_usuario = ?
+  `;
+
+  // Ejecutamos la consulta en MySQL
+  conexion.query(
+    sql,
+    [nombre, correo, telefono, id],
+    (error, resultado) => {
+
+      // Verificamos si ocurrió un error
+      if (error) {
+        console.error("Error al actualizar usuario:", error.message);
+
+        return res.status(500).json({
+          mensaje: "Error al actualizar el usuario"
+        });
+      }
+
+      // Verificamos si el usuario existe
+      if (resultado.affectedRows === 0) {
+        return res.status(404).json({
+          mensaje: "Usuario no encontrado"
+        });
+      }
+
+      // Confirmamos la actualización
+      res.json({
+        mensaje: "Usuario actualizado correctamente"
+      });
+    }
+  );
 });
 
 // Iniciamos el servidor

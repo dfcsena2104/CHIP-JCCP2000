@@ -15,11 +15,41 @@ function App() {
   // Estado que almacena la lista de usuarios consultados desde MySQL
   const [usuarios, setUsuarios] = useState([]);
 
+  // Estado que controla si se muestra el módulo de gestión
+  const [mostrarGestion, setMostrarGestion] = useState(false);
+
+  // Estado que almacena el usuario que se está editando
+  const [usuarioEditando, setUsuarioEditando] = useState(null);
+
   // Función encargada de registrar un nuevo usuario
   const guardarUsuario = async (evento) => {
 
     // Evitamos que el formulario recargue la página
     evento.preventDefault();
+
+    // Validamos que el nombre solo contenga letras y espacios
+    const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
+
+    if (!nombreValido.test(nombre)) {
+      alert("El nombre solo puede contener letras y espacios.");
+      return;
+    }
+
+    // Validamos que el teléfono solo contenga números
+    const telefonoValido = /^[0-9]+$/;
+
+    if (!telefonoValido.test(telefono)) {
+      alert("El teléfono solo puede contener números.");
+      return;
+    }
+
+    // Validamos que el correo tenga un formato válido
+    const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!correoValido.test(correo)) {
+      alert("Ingrese un correo electrónico válido.");
+      return;
+    }
 
     try {
 
@@ -27,12 +57,12 @@ function App() {
       const respuesta = await fetch("http://localhost:3000/usuarios", {
         method: "POST",
 
-        // Indicamos que los datos enviados están en formato JSON
+        // Indicamos que los datos están en formato JSON
         headers: {
           "Content-Type": "application/json",
         },
 
-        // Convertimos los datos del formulario a formato JSON
+        // Convertimos los datos del formulario a JSON
         body: JSON.stringify({
           nombre,
           correo,
@@ -40,7 +70,7 @@ function App() {
         }),
       });
 
-      // Convertimos la respuesta del servidor a un objeto JavaScript
+      // Convertimos la respuesta del servidor a JSON
       const datos = await respuesta.json();
 
       // Verificamos si el servidor respondió con un error
@@ -52,17 +82,17 @@ function App() {
       // Mostramos el mensaje enviado por el backend
       alert(datos.mensaje);
 
-      // Limpiamos los campos después de registrar el usuario
+      // Limpiamos los campos después de registrar
       setNombre("");
       setCorreo("");
       setTelefono("");
 
     } catch (error) {
 
-      // Mostramos el error en la consola del navegador
+      // Mostramos el error en la consola
       console.error("Error al conectar con el servidor:", error);
 
-      // Informamos al usuario que no fue posible realizar la conexión
+      // Informamos al usuario
       alert("No fue posible conectar con el servidor");
     }
   };
@@ -72,19 +102,19 @@ function App() {
 
     try {
 
-      // Solicitamos al backend la lista de usuarios mediante GET
+      // Solicitamos al backend la lista de usuarios
       const respuesta = await fetch("http://localhost:3000/usuarios");
 
-      // Convertimos la respuesta a formato JSON
+      // Convertimos la respuesta a JSON
       const datos = await respuesta.json();
 
-      // Verificamos si ocurrió algún error en el servidor
+      // Verificamos si ocurrió algún error
       if (!respuesta.ok) {
         alert(datos.mensaje);
         return;
       }
 
-      // Guardamos los usuarios recibidos en el estado
+      // Guardamos los usuarios recibidos
       setUsuarios(datos);
 
     } catch (error) {
@@ -92,8 +122,138 @@ function App() {
       // Mostramos el error en la consola
       console.error("Error al consultar usuarios:", error);
 
-      // Informamos al usuario sobre el problema
+      // Informamos al usuario
       alert("No fue posible consultar los usuarios");
+    }
+  };
+
+  // Función encargada de eliminar un usuario
+  const eliminarUsuario = async (id) => {
+
+    // Confirmamos antes de eliminar
+    const confirmar = window.confirm(
+      "¿Está seguro de eliminar este usuario?"
+    );
+
+    // Si cancela, no hacemos nada
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+
+      // Enviamos una petición DELETE al backend
+      const respuesta = await fetch(
+        `http://localhost:3000/usuarios/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      // Convertimos la respuesta a JSON
+      const datos = await respuesta.json();
+
+      // Verificamos si ocurrió un error
+      if (!respuesta.ok) {
+        alert(datos.mensaje);
+        return;
+      }
+
+      // Mostramos confirmación
+      alert(datos.mensaje);
+
+      // Actualizamos la lista
+      consultarUsuarios();
+
+    } catch (error) {
+
+      // Mostramos el error en la consola
+      console.error("Error al eliminar usuario:", error);
+
+      // Informamos al usuario
+      alert("No fue posible eliminar el usuario");
+    }
+  };
+
+  // Función encargada de actualizar un usuario
+  const actualizarUsuario = async () => {
+
+    // Verificamos que exista un usuario seleccionado
+    if (!usuarioEditando) {
+      return;
+    }
+
+    // Validamos que el nombre solo contenga letras y espacios
+    const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
+
+    if (!nombreValido.test(usuarioEditando.nombre)) {
+      alert("El nombre solo puede contener letras y espacios.");
+      return;
+    }
+
+    // Validamos que el teléfono solo contenga números
+    const telefonoValido = /^[0-9]+$/;
+
+    if (!telefonoValido.test(usuarioEditando.telefono)) {
+      alert("El teléfono solo puede contener números.");
+      return;
+    }
+
+    // Validamos que el correo tenga un formato válido
+    const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!correoValido.test(usuarioEditando.correo)) {
+      alert("Ingrese un correo electrónico válido.");
+      return;
+    }
+
+    try {
+
+      // Enviamos los datos modificados al backend
+      const respuesta = await fetch(
+        `http://localhost:3000/usuarios/${usuarioEditando.id_usuario}`,
+        {
+          method: "PUT",
+
+          // Indicamos que enviamos información JSON
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          // Enviamos los nuevos datos
+          body: JSON.stringify({
+            nombre: usuarioEditando.nombre,
+            correo: usuarioEditando.correo,
+            telefono: usuarioEditando.telefono,
+          }),
+        }
+      );
+
+      // Convertimos la respuesta a JSON
+      const datos = await respuesta.json();
+
+      // Verificamos si ocurrió un error
+      if (!respuesta.ok) {
+        alert(datos.mensaje);
+        return;
+      }
+
+      // Mostramos confirmación
+      alert(datos.mensaje);
+
+      // Cerramos el formulario de edición
+      setUsuarioEditando(null);
+
+      // Actualizamos la tabla
+      consultarUsuarios();
+
+    } catch (error) {
+
+      // Mostramos el error en la consola
+      console.error("Error al actualizar usuario:", error);
+
+      // Informamos al usuario
+      alert("No fue posible actualizar el usuario");
     }
   };
 
@@ -101,7 +261,7 @@ function App() {
   return (
     <div>
 
-      {/* Encabezado principal del sistema */}
+      {/* Encabezado principal */}
       <header>
         <h1>CHIP JCCP2000</h1>
         <p>Sistema de gestión</p>
@@ -110,35 +270,32 @@ function App() {
       {/* Contenido principal */}
       <main>
 
-        {/* Título del menú principal */}
+        {/* Menú principal */}
         <h2>Menú principal</h2>
 
-        {/* Botón para mostrar el formulario de registro */}
+        {/* Botón para registrar */}
         <button onClick={() => setMostrarFormulario(true)}>
           Registrar usuario
         </button>
 
-        {/* Botón para consultar los usuarios registrados */}
+        {/* Botón para consultar */}
         <button onClick={consultarUsuarios}>
           Consultar usuarios
         </button>
 
-        {/* Botón reservado para el módulo de gestión de información */}
-        <button>
+        {/* Botón para gestionar */}
+        <button onClick={() => setMostrarGestion(true)}>
           Gestionar información
         </button>
 
-        {/* Mostramos el formulario solamente cuando el estado es verdadero */}
+        {/* Formulario de registro */}
         {mostrarFormulario && (
           <section>
 
-            {/* Título del formulario */}
             <h2>Registrar usuario</h2>
 
-            {/* Formulario para registrar usuarios */}
             <form onSubmit={guardarUsuario}>
 
-              {/* Campo para ingresar el nombre */}
               <label>Nombre:</label>
 
               <input
@@ -147,7 +304,6 @@ function App() {
                 onChange={(evento) => setNombre(evento.target.value)}
               />
 
-              {/* Campo para ingresar el correo */}
               <label>Correo:</label>
 
               <input
@@ -156,7 +312,6 @@ function App() {
                 onChange={(evento) => setCorreo(evento.target.value)}
               />
 
-              {/* Campo para ingresar el teléfono */}
               <label>Teléfono:</label>
 
               <input
@@ -165,7 +320,6 @@ function App() {
                 onChange={(evento) => setTelefono(evento.target.value)}
               />
 
-              {/* Botón que envía el formulario */}
               <button type="submit">
                 Guardar usuario
               </button>
@@ -175,17 +329,134 @@ function App() {
           </section>
         )}
 
-        {/* Mostramos la tabla si existen usuarios registrados */}
+        {/* Módulo de gestión */}
+        {mostrarGestion && (
+          <section>
+
+            <h2>Gestionar información</h2>
+
+            {/* Formulario de edición */}
+            {usuarioEditando && (
+              <section>
+
+                <h3>Editar usuario</h3>
+
+                <label>Nombre:</label>
+
+                <input
+                  type="text"
+                  value={usuarioEditando.nombre}
+                  onChange={(evento) =>
+                    setUsuarioEditando({
+                      ...usuarioEditando,
+                      nombre: evento.target.value,
+                    })
+                  }
+                />
+
+                <label>Correo:</label>
+
+                <input
+                  type="email"
+                  value={usuarioEditando.correo}
+                  onChange={(evento) =>
+                    setUsuarioEditando({
+                      ...usuarioEditando,
+                      correo: evento.target.value,
+                    })
+                  }
+                />
+
+                <label>Teléfono:</label>
+
+                <input
+                  type="tel"
+                  value={usuarioEditando.telefono}
+                  onChange={(evento) =>
+                    setUsuarioEditando({
+                      ...usuarioEditando,
+                      telefono: evento.target.value,
+                    })
+                  }
+                />
+
+                <button onClick={actualizarUsuario}>
+                  Guardar cambios
+                </button>
+
+                <button onClick={() => setUsuarioEditando(null)}>
+                  Cancelar
+                </button>
+
+              </section>
+            )}
+
+            {/* Botón para cargar usuarios */}
+            <button onClick={consultarUsuarios}>
+              Cargar usuarios
+            </button>
+
+            {/* Tabla de gestión */}
+            {usuarios.length > 0 && (
+              <table border="1">
+
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                  {usuarios.map((usuario) => (
+                    <tr key={usuario.id_usuario}>
+
+                      <td>{usuario.id_usuario}</td>
+                      <td>{usuario.nombre}</td>
+                      <td>{usuario.correo}</td>
+                      <td>{usuario.telefono}</td>
+
+                      <td>
+
+                        <button
+                          onClick={() => setUsuarioEditando(usuario)}
+                        >
+                          Editar
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            eliminarUsuario(usuario.id_usuario)
+                          }
+                        >
+                          Eliminar
+                        </button>
+
+                      </td>
+
+                    </tr>
+                  ))}
+
+                </tbody>
+
+              </table>
+            )}
+
+          </section>
+        )}
+
+        {/* Tabla de usuarios registrados */}
         {usuarios.length > 0 && (
           <section>
 
-            {/* Título de la consulta */}
             <h2>Usuarios registrados</h2>
 
-            {/* Tabla para mostrar los usuarios */}
             <table border="1">
 
-              {/* Encabezados de la tabla */}
               <thead>
                 <tr>
                   <th>ID</th>
@@ -196,14 +467,11 @@ function App() {
                 </tr>
               </thead>
 
-              {/* Cuerpo de la tabla */}
               <tbody>
 
-                {/* Recorremos la lista de usuarios */}
                 {usuarios.map((usuario) => (
                   <tr key={usuario.id_usuario}>
 
-                    {/* Mostramos los datos de cada usuario */}
                     <td>{usuario.id_usuario}</td>
                     <td>{usuario.nombre}</td>
                     <td>{usuario.correo}</td>
@@ -226,5 +494,5 @@ function App() {
   );
 }
 
-// Exportamos el componente para utilizarlo en la aplicación
+// Exportamos el componente
 export default App;
