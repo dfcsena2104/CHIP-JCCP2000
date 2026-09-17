@@ -1,0 +1,107 @@
+/* Configuración general de la página */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f2f4f7;
+}
+
+/* Encabezado principal */
+header {
+  background-color: #1f2937;
+  color: white;
+  padding: 25px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p {
+  margin-top: 8px;
+}
+
+/* Contenedor principal */
+main {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: white;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Títulos */
+main h2 {
+  margin-bottom: 30px;
+}
+
+/* Botones */
+button {
+  margin: 10px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  background-color: #2563eb;
+  color: white;
+}
+
+/* Efecto al pasar el mouse */
+button:hover {
+  opacity: 0.85;
+}
+
+/* Sección del formulario */
+section {
+  margin-top: 30px;
+}
+
+/* Formulario */
+form {
+  max-width: 450px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Etiquetas */
+form label {
+  text-align: left;
+  font-weight: bold;
+}
+
+/* Campos de entrada */
+form input {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+/* Tabla de usuarios */
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+/* Celdas de la tabla */
+th,
+td {
+  padding: 12px;
+  border: 1px solid #ddd;
+}
+
+/* Encabezado de la tabla */
+th {
+  background-color: #1f2937;
+  color: white;
+}
+
+/* Filas de la tabla */
+tbody tr:hover {
+  background-color: #f2f4f7;
+}
