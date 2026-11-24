@@ -1,174 +1,146 @@
 # CHIP JCCP2000
 
-## Sistema de gestión web
+Proyecto del programa de Análisis y Desarrollo de Software (ADSO) del SENA. Presenta el proyecto de un microchip para cerraduras inteligentes y permite gestionar usuarios desde una aplicación web y una aplicación móvil, conectadas a una base de datos MySQL.
 
-Proyecto desarrollado como evidencia de codificación de módulos de software para el programa de formación ADSO del SENA.
+## Módulos
 
-## Descripción
+| Módulo | Carpeta | Tecnologías | Descripción |
+|---|---|---|---|
+| Web | `src/` | React, Vite, React Router | Portada, detalle de cada área de mejora y gestión de usuarios |
+| API | `backend/` | Node.js, Express, MySQL | Registro, consulta, edición y eliminación de usuarios, con validación de datos |
+| Móvil | `movil/` | React Native, Expo | Portada, detalle y gestión de usuarios |
+| Stand-alone | `backend/stand-alone/` | Node.js (consola) | Exporta los usuarios a un archivo CSV |
+| Contenido compartido | `shared/` | JavaScript | Textos de las áreas de mejora y reglas de validación para la web y la app móvil |
 
-CHIP JCCP2000 es una aplicación web desarrollada para gestionar información de usuarios mediante una interfaz sencilla y organizada.
+## Requisitos
 
-El proyecto implementa un módulo web que permite registrar usuarios, consultar la información almacenada y establecer comunicación entre la interfaz, un servidor backend y una base de datos MySQL.
-
-## Tecnologías utilizadas
-
-* **React** — desarrollo de la interfaz de usuario.
-* **JavaScript** — lenguaje principal de programación.
-* **Vite** — herramienta de desarrollo y construcción del proyecto.
-* **Node.js** — entorno de ejecución para el backend.
-* **Express** — framework utilizado para crear el servidor y las API.
-* **MySQL** — sistema de gestión de base de datos.
-* **Git y GitHub** — control de versiones y almacenamiento del repositorio.
-
-## Funcionalidades
-
-### Registro de usuarios
-
-Permite ingresar:
-
-* Nombre.
-* Correo electrónico.
-* Teléfono.
-
-Los datos son enviados desde React al backend mediante una petición HTTP `POST` y posteriormente almacenados en MySQL.
-
-### Consulta de usuarios
-
-Permite consultar los usuarios registrados mediante una petición `GET`.
-
-La información se presenta en una tabla con:
-
-* ID.
-* Nombre.
-* Correo.
-* Teléfono.
-* Fecha de registro.
-
-## Arquitectura del proyecto
-
-El sistema utiliza una arquitectura dividida en tres componentes principales:
-
-```text
-CHIP JCCP2000
-│
-├── Frontend
-│   └── React + Vite
-│
-├── Backend
-│   └── Node.js + Express
-│
-└── Base de datos
-    └── MySQL
-```
-
-La comunicación se realiza mediante solicitudes HTTP entre el frontend y el backend.
-
-## Estructura principal
-
-```text
-chip-jccp2000/
-│
-├── backend/
-│   ├── db.js
-│   ├── server.js
-│   ├── package.json
-│   └── package-lock.json
-│
-├── public/
-│
-├── src/
-│   ├── assets/
-│   ├── App.jsx
-│   ├── App.css
-│   ├── index.css
-│   └── main.jsx
-│
-├── .gitignore
-├── index.html
-├── package.json
-├── package-lock.json
-└── vite.config.js
-```
+- Node.js LTS
+- Git
+- MySQL 8
+- Para la app móvil: la aplicación **Expo Go** en el celular
 
 ## Base de datos
 
-La aplicación utiliza una base de datos independiente denominada:
+La aplicación usa una base de datos llamada `JCCP2000` con la tabla `usuarios`:
 
-```text
-JCCP2000
+```sql
+CREATE DATABASE IF NOT EXISTS JCCP2000;
+USE JCCP2000;
+
+CREATE TABLE IF NOT EXISTS usuarios (
+  id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  correo VARCHAR(100) NOT NULL,
+  telefono VARCHAR(20) NOT NULL,
+  fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-Tabla principal:
+Las credenciales se guardan en `backend/.env`, que no se sube al repositorio. Su contenido es:
 
-```text
-usuarios
+```
+DB_HOST=localhost
+DB_USER=usuario
+DB_PASSWORD=contraseña
+DB_NAME=JCCP2000
 ```
 
-Campos:
+## Instalación
 
-```text
-id_usuario
-nombre
-correo
-telefono
-fecha_registro
+Clona el repositorio:
+
+```bash
+git clone https://github.com/dfcsena2104/CHIP-JCCP2000.git
+cd CHIP-JCCP2000
 ```
 
-Las credenciales de conexión se almacenan mediante variables de entorno en un archivo `.env`, el cual se encuentra excluido del repositorio mediante `.gitignore`.
-
-## API
-
-### Registrar usuario
-
-```text
-POST /usuarios
-```
-
-Recibe los datos del usuario y los almacena en la base de datos.
-
-### Consultar usuarios
-
-```text
-GET /usuarios
-```
-
-Devuelve los usuarios registrados en la base de datos.
-
-## Ejecución del proyecto
-
-### Frontend
-
-Desde la carpeta principal:
+Instala las dependencias de la web y del backend:
 
 ```bash
 npm install
-npm run dev
+cd backend
+npm install
+cd ..
 ```
 
-La aplicación estará disponible mediante el servidor de desarrollo de Vite.
-
-### Backend
-
-Desde la carpeta `backend`:
+Instala las dependencias de la app móvil:
 
 ```bash
+cd movil
 npm install
+cd ..
+```
+
+## Ejecución
+
+**Backend** (terminal 1, dentro de `backend/`):
+
+```bash
 node server.js
 ```
 
-El backend utiliza el puerto:
+**Web** (terminal 2, en la carpeta principal):
 
-```text
-3000
+```bash
+npm run dev
 ```
 
-## Control de versiones
+Abre `http://localhost:5173` en el navegador.
 
-El proyecto utiliza Git para realizar el control de versiones y GitHub como repositorio remoto.
+**App móvil** (terminal 3, dentro de `movil/`):
 
-Repositorio:
+```bash
+npx expo start
+```
 
-https://github.com/dfcsena2104/CHIP-JCCP2000
+Escanea el código QR con Expo Go. El celular y el computador deben estar en la misma red Wi-Fi.
+
+**Exportador de reportes** (dentro de `backend/`, con MySQL activo):
+
+```bash
+node stand-alone/exportar-usuarios.js
+```
+
+Genera `backend/stand-alone/reporte_usuarios.csv`. Este archivo contiene datos personales, por eso no se sube al repositorio.
+
+## Configuración de la app móvil
+
+El celular no puede usar `localhost`, porque esa dirección apunta al propio celular. El archivo `movil/src/config.js` debe contener la IP del computador en la red Wi-Fi:
+
+```javascript
+export const API_URL = "http://192.168.0.19:3000";
+```
+
+Para obtener la IP, ejecuta `ipconfig` en PowerShell y busca la **Dirección IPv4** del adaptador Wi-Fi.
+
+## API
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/` | Verifica que el servidor funciona |
+| POST | `/usuarios` | Registra un usuario |
+| GET | `/usuarios` | Lista los usuarios |
+| PUT | `/usuarios/:id` | Actualiza un usuario |
+| DELETE | `/usuarios/:id` | Elimina un usuario |
+
+El servidor valida nombre, teléfono y correo antes de guardar o actualizar. Si un dato no es válido, responde con código 400 y el motivo.
+
+## Contenido compartido
+
+La carpeta `shared/` contiene los textos de las áreas de mejora (`contenido.js`) y las reglas de validación (`validaciones.js`). La web y la app móvil importan estos archivos, así que un cambio se hace en un solo lugar.
+
+## Calidad del código
+
+Para revisar el estilo del código, ejecuta desde la carpeta principal:
+
+```bash
+npm run lint
+```
+
+## Documentación
+
+- `DOCUMENTACION.md`: estructura del proyecto, instalación y ejecución.
+- `PRUEBAS_MODULOS.md`: casos de prueba y resultados.
 
 ## Autor
 
