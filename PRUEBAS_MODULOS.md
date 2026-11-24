@@ -115,10 +115,10 @@ Invoke-RestMethod -Uri http://localhost:3000/usuarios/1 -Method Delete
 | A-05 | PUT `/usuarios/99999` | Respuesta 404 con "Usuario no encontrado" | | |
 | A-06 | DELETE `/usuarios/{id existente}` | Respuesta 200 con "Usuario eliminado correctamente" | | |
 | A-07 | DELETE `/usuarios/99999` | Respuesta 404 con "Usuario no encontrado" | | |
-| A-08 | POST `/usuarios` sin campos (`{}`) | Respuesta de error (500) con mensaje de registro fallido | | |
+| A-08 | POST `/usuarios` sin campos (`{}`) | Respuesta 400 con "El nombre solo puede contener letras y espacios." | Código 400 con el mensaje esperado (después de agregar la validación en el servidor) | Aprobado |
 | A-09 | Apagar MySQL y consultar GET `/usuarios` | Respuesta 500 con "Error al consultar usuarios" | | |
 
-**Caso A-08:** el backend no valida el contenido de los datos antes de insertarlos. Si MySQL rechaza los valores por la restricción `NOT NULL`, el servidor responde con error; si los acepta, guarda registros incompletos. Registra lo que realmente ocurre y consulta la sección 8.
+**Caso A-08:** antes de la corrección, el servidor respondía 500 y el mensaje no explicaba el problema. Después de agregar la validación en `server.js`, responde 400 con el motivo. Los resultados de ambas ejecuciones se describen en la sección 8.
 
 ## 7. Módulo móvil
 
@@ -144,7 +144,7 @@ La aplicación móvil está desarrollada con React Native y Expo, en la carpeta 
 
 Estos puntos deben registrarse como resultados de la revisión, no ocultarse:
 
-- **Validación en el servidor:** el backend no valida nombre, teléfono ni correo. Las validaciones solo existen en el frontend, por lo que una petición directa a la API puede guardar datos que el formulario rechazaría. Se recomienda agregar la misma validación en `server.js` antes de la entrega.
+- **Validación en el servidor (resuelto):** el backend ahora valida nombre, teléfono y correo antes de registrar o actualizar un usuario. Se probó con el caso A-08 y con un correo inválido enviado directamente a la API; ambos responden 400 con el mensaje correspondiente.
 - **Mensaje de error de consulta:** al apagar la base de datos, la consulta devuelve un mensaje genérico. Esto es aceptable para el usuario, pero el detalle queda en la consola del servidor.
 - **Aviso del navegador:** en los campos de correo, el navegador valida antes que la aplicación.
 
@@ -166,7 +166,7 @@ Programa: `backend/stand-alone/exportar-usuarios.js`. Se ejecuta desde la carpet
 |---|---|---|---|---|
 | Validaciones frontend (sección 4) | 15 | 15 | 0 | V-10 fallido en la primera ejecución; corregido y aprobado en la repetición |
 | Funcionalidades frontend (sección 5) | 10 | 10 | 0 | Portada, detalle, navegación y gestión de usuarios |
-| API REST (sección 6) | 9 | 9 | 0 | Registrar el resultado real del caso A-08 según la sección 8 |
+| API REST (sección 6) | 9 | 9 | 0 | Incluye la validación agregada al servidor (caso A-08) |
 | Stand-alone del proyecto (sección 9) | 3 | 3 | 0 | Exportador de reportes de usuarios |
 | Módulo móvil (sección 7) | 9 | 9 | 0 | Completo |
 

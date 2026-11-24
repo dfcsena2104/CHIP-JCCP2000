@@ -242,7 +242,7 @@ El proyecto se versiona con Git y se publica en GitHub. El cambio que incorpora 
 ## 15. Seguridad
 
 - El archivo `.env` con las credenciales de MySQL está excluido del repositorio mediante `.gitignore`.
-- El backend acepta datos en formato JSON. Actualmente no valida el contenido de nombre, teléfono ni correo; esa validación está pendiente de agregar en el servidor.
+- El backend valida nombre, teléfono y correo antes de registrar o actualizar un usuario, con las mismas reglas de la web y la app móvil.
 - Las consultas usan parámetros (`?`), lo que evita la inyección SQL.
 
 ## 16. Capturas de pantalla
@@ -259,6 +259,5 @@ El proyecto se versiona con Git y se publica en GitHub. El cambio que incorpora 
 - Las imágenes de las tarjetas son ilustraciones generadas para la evidencia; pueden reemplazarse por fotografías reales.
 - La API no tiene autenticación; en un entorno real debería protegerse.
 - Los textos de las áreas están en `shared/contenido.js`; un siguiente paso sería cargarlos desde la base de datos.
-- La API no valida el contenido de los datos; la validación solo existe en la web y en la app móvil.
 - La app móvil no tiene edición de usuarios.
 - La dirección del backend en `movil/src/config.js` corresponde a la IP del computador de desarrollo y debe cambiarse en otro equipo.
