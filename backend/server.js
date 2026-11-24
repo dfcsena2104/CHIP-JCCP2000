@@ -13,11 +13,35 @@ const app = express();
 // Puerto del servidor
 const PORT = 3000;
 
-// Permitimos la comunicación con React
+// Permitimos la comunicación con React y la app móvil
 app.use(cors());
 
 // Permitimos recibir datos JSON
 app.use(express.json());
+
+// Reglas de validación (las mismas que usan la web y la app móvil)
+const esNombreValido = (texto) =>
+  typeof texto === "string" && /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/.test(texto);
+
+const esTelefonoValido = (texto) =>
+  typeof texto === "string" && /^[0-9]+$/.test(texto);
+
+const esCorreoValido = (texto) =>
+  typeof texto === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto);
+
+// Devuelve el mensaje del primer dato no válido, o null si todos son correctos
+function validarUsuario(datos) {
+  if (!esNombreValido(datos.nombre)) {
+    return "El nombre solo puede contener letras y espacios.";
+  }
+  if (!esTelefonoValido(datos.telefono)) {
+    return "El teléfono solo puede contener números.";
+  }
+  if (!esCorreoValido(datos.correo)) {
+    return "Ingrese un correo electrónico válido.";
+  }
+  return null;
+}
 
 // Mensaje de prueba
 console.log("Archivo db.js cargado correctamente");
@@ -29,6 +53,15 @@ app.get("/", (req, res) => {
 
 // Registrar usuario
 app.post("/usuarios", (req, res) => {
+
+  // Validamos los datos antes de guardarlos
+  const errorValidacion = validarUsuario(req.body || {});
+
+  if (errorValidacion) {
+    return res.status(400).json({
+      mensaje: errorValidacion
+    });
+  }
 
   const { nombre, correo, telefono } = req.body;
 
@@ -81,15 +114,12 @@ app.get("/usuarios", (req, res) => {
 // Eliminar un usuario por su ID
 app.delete("/usuarios/:id", (req, res) => {
 
-  // Obtenemos el ID enviado en la URL
   const { id } = req.params;
 
-  // Consulta SQL para eliminar el usuario
   const sql = "DELETE FROM usuarios WHERE id_usuario = ?";
 
   conexion.query(sql, [id], (error, resultado) => {
 
-    // Verificamos si ocurrió un error
     if (error) {
       console.error("Error al eliminar usuario:", error.message);
 
@@ -98,14 +128,12 @@ app.delete("/usuarios/:id", (req, res) => {
       });
     }
 
-    // Verificamos si el usuario existe
     if (resultado.affectedRows === 0) {
       return res.status(404).json({
         mensaje: "Usuario no encontrado"
       });
     }
 
-    // Confirmamos la eliminación
     res.json({
       mensaje: "Usuario eliminado correctamente"
     });
@@ -115,26 +143,30 @@ app.delete("/usuarios/:id", (req, res) => {
 // Actualizar un usuario por su ID
 app.put("/usuarios/:id", (req, res) => {
 
-  // Obtenemos el ID enviado en la URL
   const { id } = req.params;
 
-  // Obtenemos los nuevos datos enviados desde React
+  // Validamos los datos antes de actualizarlos
+  const errorValidacion = validarUsuario(req.body || {});
+
+  if (errorValidacion) {
+    return res.status(400).json({
+      mensaje: errorValidacion
+    });
+  }
+
   const { nombre, correo, telefono } = req.body;
 
-  // Consulta SQL para actualizar el usuario
   const sql = `
     UPDATE usuarios
     SET nombre = ?, correo = ?, telefono = ?
     WHERE id_usuario = ?
   `;
 
-  // Ejecutamos la consulta en MySQL
   conexion.query(
     sql,
     [nombre, correo, telefono, id],
     (error, resultado) => {
 
-      // Verificamos si ocurrió un error
       if (error) {
         console.error("Error al actualizar usuario:", error.message);
 
@@ -143,14 +175,12 @@ app.put("/usuarios/:id", (req, res) => {
         });
       }
 
-      // Verificamos si el usuario existe
       if (resultado.affectedRows === 0) {
         return res.status(404).json({
           mensaje: "Usuario no encontrado"
         });
       }
 
-      // Confirmamos la actualización
       res.json({
         mensaje: "Usuario actualizado correctamente"
       });
