@@ -25,14 +25,30 @@ export default function Usuarios() {
       }
 
       setUsuarios(datos);
-    } catch (error) {
+    } catch {
       Alert.alert("Aviso", "No fue posible consultar los usuarios");
     }
   };
 
   // Carga la lista al abrir la pantalla
-  useEffect(() => {
-    consultarUsuarios();
+    useEffect(() => {
+    const cargarAlAbrir = async () => {
+      try {
+        const respuesta = await fetch(`${API_URL}/usuarios`);
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+          Alert.alert("Aviso", datos.mensaje);
+          return;
+        }
+
+        setUsuarios(datos);
+      } catch {
+        Alert.alert("Aviso", "No fue posible consultar los usuarios");
+      }
+    };
+
+    cargarAlAbrir();
   }, []);
 
   // Valida los datos y los envía al backend para registrar un usuario nuevo
@@ -68,7 +84,7 @@ export default function Usuarios() {
       setCorreo("");
       setTelefono("");
       consultarUsuarios();
-    } catch (error) {
+    } catch  {
       Alert.alert("Aviso", "No fue posible conectar con el servidor");
     }
   };
@@ -121,7 +137,7 @@ export default function Usuarios() {
       Alert.alert("Aviso", datos.mensaje);
       setEditando(null);
       consultarUsuarios();
-    } catch (error) {
+    } catch {
       Alert.alert("Aviso", "No fue posible actualizar el usuario");
     }
   };
@@ -145,7 +161,7 @@ export default function Usuarios() {
 
             Alert.alert("Aviso", datos.mensaje);
             consultarUsuarios();
-          } catch (error) {
+          } catch  {
             Alert.alert("Aviso", "No fue posible eliminar el usuario");
           }
         },
