@@ -1,5 +1,6 @@
 // Importamos useState para manejar los datos y estados de la aplicación
 import { useState } from "react";
+import { esNombreValido, esTelefonoValido, esCorreoValido } from "../shared/validaciones.js";
 
 // Componente principal de la aplicación
 function App() {
@@ -28,25 +29,25 @@ function App() {
     evento.preventDefault();
 
     // Validamos que el nombre solo contenga letras y espacios
-    const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
+    
 
-    if (!nombreValido.test(nombre)) {
+    if (!esNombreValido(nombre)) {
       alert("El nombre solo puede contener letras y espacios.");
       return;
     }
 
     // Validamos que el teléfono solo contenga números
-    const telefonoValido = /^[0-9]+$/;
+    
 
-    if (!telefonoValido.test(telefono)) {
+    if (!esTelefonoValido(telefono)) {
       alert("El teléfono solo puede contener números.");
       return;
     }
 
     // Validamos que el correo tenga un formato válido
-    const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
 
-    if (!correoValido.test(correo)) {
+    if (!esCorreoValido(correo)) {
       alert("Ingrese un correo electrónico válido.");
       return;
     }
@@ -184,25 +185,25 @@ function App() {
     }
 
     // Validamos que el nombre solo contenga letras y espacios
-    const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
+    
 
-    if (!nombreValido.test(usuarioEditando.nombre)) {
+    if (!esNombreValido(usuarioEditando.nombre)) {
       alert("El nombre solo puede contener letras y espacios.");
       return;
     }
 
     // Validamos que el teléfono solo contenga números
-    const telefonoValido = /^[0-9]+$/;
+    
 
-    if (!telefonoValido.test(usuarioEditando.telefono)) {
+    if (!esTelefonoValido(usuarioEditando.telefono)) {
       alert("El teléfono solo puede contener números.");
       return;
     }
 
     // Validamos que el correo tenga un formato válido
-    const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
 
-    if (!correoValido.test(usuarioEditando.correo)) {
+    if (!esCorreoValido(usuarioEditando.correo)) {
       alert("Ingrese un correo electrónico válido.");
       return;
     }
