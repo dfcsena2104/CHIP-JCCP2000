@@ -10,6 +10,9 @@ export default function Usuarios() {
   const [correo, setCorreo] = useState("");
   const [telefono, setTelefono] = useState("");
 
+  // Usuario que se está editando (null si no hay ninguno)
+  const [editando, setEditando] = useState(null);
+
   // Consulta la lista de usuarios desde el backend
   const consultarUsuarios = async () => {
     try {
@@ -32,7 +35,7 @@ export default function Usuarios() {
     consultarUsuarios();
   }, []);
 
-  // Valida los datos con las mismas reglas de la web y los envía al backend
+  // Valida los datos y los envía al backend para registrar un usuario nuevo
   const guardarUsuario = async () => {
     if (!esNombreValido(nombre)) {
       Alert.alert("Aviso", "El nombre solo puede contener letras y espacios.");
@@ -67,6 +70,59 @@ export default function Usuarios() {
       consultarUsuarios();
     } catch (error) {
       Alert.alert("Aviso", "No fue posible conectar con el servidor");
+    }
+  };
+
+  // Abre el formulario de edición con los datos actuales del usuario
+  const abrirEdicion = (usuario) => {
+    setEditando({
+      id_usuario: usuario.id_usuario,
+      nombre: usuario.nombre,
+      correo: usuario.correo,
+      telefono: usuario.telefono,
+    });
+  };
+
+  // Valida los datos editados y los envía con PUT, igual que la web
+  const guardarEdicion = async () => {
+    if (!editando) {
+      return;
+    }
+    if (!esNombreValido(editando.nombre)) {
+      Alert.alert("Aviso", "El nombre solo puede contener letras y espacios.");
+      return;
+    }
+    if (!esTelefonoValido(editando.telefono)) {
+      Alert.alert("Aviso", "El teléfono solo puede contener números.");
+      return;
+    }
+    if (!esCorreoValido(editando.correo)) {
+      Alert.alert("Aviso", "Ingrese un correo electrónico válido.");
+      return;
+    }
+
+    try {
+      const respuesta = await fetch(`${API_URL}/usuarios/${editando.id_usuario}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: editando.nombre,
+          correo: editando.correo,
+          telefono: editando.telefono,
+        }),
+      });
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        Alert.alert("Aviso", datos.mensaje);
+        return;
+      }
+
+      Alert.alert("Aviso", datos.mensaje);
+      setEditando(null);
+      consultarUsuarios();
+    } catch (error) {
+      Alert.alert("Aviso", "No fue posible actualizar el usuario");
     }
   };
 
@@ -134,6 +190,44 @@ export default function Usuarios() {
             <Text style={estilos.textoBoton}>Consultar usuarios</Text>
           </TouchableOpacity>
 
+          {editando && (
+            <View style={estilos.edicion}>
+              <Text style={estilos.titulo}>Editar usuario</Text>
+
+              <Text style={estilos.etiqueta}>Nombre:</Text>
+              <TextInput
+                style={estilos.campo}
+                value={editando.nombre}
+                onChangeText={(texto) => setEditando({ ...editando, nombre: texto })}
+              />
+
+              <Text style={estilos.etiqueta}>Correo:</Text>
+              <TextInput
+                style={estilos.campo}
+                value={editando.correo}
+                onChangeText={(texto) => setEditando({ ...editando, correo: texto })}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <Text style={estilos.etiqueta}>Teléfono:</Text>
+              <TextInput
+                style={estilos.campo}
+                value={editando.telefono}
+                onChangeText={(texto) => setEditando({ ...editando, telefono: texto })}
+                keyboardType="phone-pad"
+              />
+
+              <TouchableOpacity style={estilos.boton} onPress={guardarEdicion}>
+                <Text style={estilos.textoBoton}>Guardar cambios</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={estilos.botonSecundario} onPress={() => setEditando(null)}>
+                <Text style={estilos.textoBoton}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           <Text style={estilos.titulo}>Usuarios registrados</Text>
         </View>
       }
@@ -145,6 +239,9 @@ export default function Usuarios() {
           <Text>Correo: {item.correo}</Text>
           <Text>Teléfono: {item.telefono}</Text>
           <Text>Fecha de registro: {item.fecha_registro}</Text>
+          <TouchableOpacity style={estilos.botonEditar} onPress={() => abrirEdicion(item)}>
+            <Text style={estilos.textoBoton}>Editar</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={estilos.botonEliminar}
             onPress={() => eliminarUsuario(item.id_usuario, item.nombre)}
@@ -169,8 +266,10 @@ const estilos = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#fff",
   },
+  edicion: { backgroundColor: "#fff", borderRadius: 8, padding: 12, marginTop: 12 },
   boton: { backgroundColor: "#2563eb", padding: 12, borderRadius: 6, alignItems: "center", marginTop: 16 },
   botonSecundario: { backgroundColor: "#1f2937", padding: 12, borderRadius: 6, alignItems: "center", marginTop: 8 },
+  botonEditar: { backgroundColor: "#2563eb", padding: 10, borderRadius: 6, alignItems: "center", marginTop: 8 },
   botonEliminar: { backgroundColor: "#dc2626", padding: 10, borderRadius: 6, alignItems: "center", marginTop: 8 },
   textoBoton: { color: "#fff", fontWeight: "bold" },
   tarjeta: { backgroundColor: "#fff", borderRadius: 8, padding: 12, marginBottom: 10, gap: 4 },
